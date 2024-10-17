@@ -649,7 +649,7 @@ async def start(update, context): # 当用户输入/start时，返回文本
     else:
         update_language_status("English", chat_id=convo_id)
     message = (
-        f"Hi `{user.username}` ! I am an Teal-bot, a friendly assistant. I will do my best to help answer your questions.\n\n"
+        f"Hi `{user.username}` ! I am an Teal GPT, a friendly assistant. I will do my best to help answer your questions.\n\n"
     )
     if len(context.args) == 2 and context.args[1].startswith("sk-"):
         api_url = context.args[0]
@@ -694,7 +694,7 @@ async def post_init(application: Application) -> None:
         # BotCommand('zh2en', 'Translate to English'),
     ])
     description = (
-        "I am an Teal-bot, a friendly assistant. I will do my best to help answer your questions."
+        "I am an Teal GPT, a friendly assistant. I will do my best to help answer your questions."
     )
     await application.bot.set_my_description(description)
 
