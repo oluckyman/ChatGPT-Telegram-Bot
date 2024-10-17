@@ -10,8 +10,8 @@ from utils.scripts import GetMesageInfo
 def ban_message(update, convo_id):
     message = (
         f"`Hi, {update.effective_user.username}!`\n\n"
-        f"id: `{update.effective_user.id}`\n\n"
-        f"{strings['message_ban'][config.get_current_lang(convo_id)]}\n\n"
+        f"{strings['message_ban'][config.get_current_lang(convo_id)]} {config.ADMIN_USERNAME}\n\n"
+        f"ID: `{update.effective_user.id}`\n\n"
     )
     return message
 

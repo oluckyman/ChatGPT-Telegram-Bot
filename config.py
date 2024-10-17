@@ -11,6 +11,7 @@ from ModelMerge.src.ModelMerge.models.base import BaseAPI
 
 from telegram import InlineKeyboardButton
 
+ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin')
 NICK = os.environ.get('NICK', None)
 PORT = int(os.environ.get('PORT', '8080'))
 BOT_TOKEN = os.environ.get('BOT_TOKEN', None)

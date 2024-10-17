@@ -132,9 +132,9 @@ strings = {
     },
     "message_ban": {
         "zh": "您没有权限访问！",
-        "en": "You do not have permission to access!",
+        "en": "You do not have permission to access",
         "zh-hk": "您沒有權限訪問！",
-        "ru": "У вас нет доступа к боту!",
+        "ru": "Чтоб получить доступ, скопируй свой ID и пришли его",
     },
     "SEARCH": {
         "zh": "网络搜索",
