@@ -5,8 +5,10 @@ services:
       dockerfile: Dockerfile.build
     image: teal-gpt-bot-image
     container_name: teal-gpt-bot-container
+    restart: unless-stopped
     env_file: .env
     volumes:
       - ./user_configs:/home/user_configs
-    ports:
-      - 80:8080
+    # We don't use web_hook
+    # ports:
+    #   - 80:8080
