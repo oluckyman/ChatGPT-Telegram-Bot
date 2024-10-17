@@ -14,8 +14,8 @@ COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/pytho
 # Copy the local repository files to the container
 COPY . /home/ChatGPT-Telegram-Bot
 
-# Clean temporary files
-RUN rm -rf /tmp/*
+RUN apk add --no-cache git \
+    && rm -rf /tmp/*
 
 # Run the bot script
 ENTRYPOINT ["python", "-u", "/home/ChatGPT-Telegram-Bot/bot.py"]
