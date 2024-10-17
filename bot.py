@@ -106,16 +106,18 @@ async def command_bot(update, context, language=None, prompt=translator_prompt, 
             if rawtext and rawtext.split()[0].lower() == botNick:
                 message_has_nick = True
 
+            quote_start = "Quoted:\n---\n> "
+            quote_end = "\n---\n\nUser reply:\n"
             if update_message.reply_to_message \
             and update_message.from_user.is_bot == False \
             and (update_message.reply_to_message.from_user.username == bot_info.username or message_has_nick):
                 if update_message.reply_to_message.from_user.is_bot and Users.get_config(convo_id, "TITLE") == True:
-                    message = '\n'.join(reply_to_message_text.split('\n')[1:]) + "\n" + message
+                    message = '\n'.join(quote_start + reply_to_message_text.split('\n')[1:]) + quote_end + message
                 else:
                     if reply_to_message_text:
-                        message = reply_to_message_text + "\n" + message
+                        message = quote_start + reply_to_message_text + quote_end + message
                     if reply_to_message_file_content:
-                        message = reply_to_message_file_content + "\n" + message
+                        message = reply_to_message_file_content + quote_end + message
             elif update_message.reply_to_message and update_message.reply_to_message.from_user.is_bot \
             and update_message.reply_to_message.from_user.username != bot_info.username:
                 return
