@@ -55,7 +55,7 @@ PREFERENCES = {
     "REPLY"             : (os.environ.get('REPLY', "False") == "False") == False,
 }
 
-LANGUAGE = os.environ.get('LANGUAGE', 'English')
+LANGUAGE = os.environ.get('LANGUAGE', 'Russian')
 
 LANGUAGES = {
     "English": False,
