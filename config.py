@@ -15,6 +15,9 @@ ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin')
 NICK = os.environ.get('NICK', None)
 PORT = int(os.environ.get('PORT', '8080'))
 BOT_TOKEN = os.environ.get('BOT_TOKEN', None)
+RESET_TIME = int(os.environ.get('RESET_TIME', '3600'))
+if RESET_TIME < 60:
+    RESET_TIME = 60
 
 GPT_ENGINE = os.environ.get('GPT_ENGINE', 'gpt-4o')
 API_URL = os.environ.get('API_URL', 'https://api.openai.com/v1/chat/completions')
@@ -78,19 +81,43 @@ claude_systemprompt = os.environ.get('SYSTEMPROMPT', prompt.claude_system_prompt
 
 
 import json
-import fcntl
 from contextlib import contextmanager
 
 CONFIG_DIR = os.environ.get('CONFIG_DIR', 'user_configs')
 
+import os
+from contextlib import contextmanager
+
 @contextmanager
 def file_lock(filename):
-    with open(filename, 'a+') as f:
-        try:
-            fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            yield f
-        finally:
-            fcntl.flock(f, fcntl.LOCK_UN)
+    if os.name == 'nt':  # Windows系统
+        import msvcrt
+        with open(filename, 'a+') as f:
+            try:
+                msvcrt.locking(f.fileno(), msvcrt.LK_NBLCK, 1)
+                yield f
+            finally:
+                try:
+                    f.seek(0)
+                    msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
+                except:
+                    pass  # 如果解锁失败，我们也不能做太多
+    else:  # Unix-like系统
+        import fcntl
+        with open(filename, 'a+') as f:
+            try:
+                fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                yield f
+            finally:
+                fcntl.flock(f, fcntl.LOCK_UN)
+
+# # 使用示例
+# try:
+#     with file_lock("myfile.txt") as f:
+#         # 在这里进行文件操作
+#         f.write("Some data\n")
+# except IOError:
+#     print("无法获取文件锁，文件可能正被其他进程使用")
 
 def save_user_config(user_id, config):
     if not os.path.exists(CONFIG_DIR):
@@ -196,6 +223,9 @@ class UserConfig:
                     if key == "api_key" and value != self.api_key:
                         self.users[user_id]["api_key"] = self.api_key
                         update_user_config(user_id, "api_key", self.api_key)
+                    if user_id == "global" and key == "systemprompt" and value != self.systemprompt:
+                        self.users[user_id]["systemprompt"] = self.systemprompt
+                        update_user_config(user_id, "systemprompt", self.systemprompt)
 
     def get_init_preferences(self):
         return {

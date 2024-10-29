@@ -61,13 +61,14 @@ The following is a list of environment variables related to the bot's core setti
 | BLACK_LIST | Set which users are prohibited from accessing the bot, and connect the user IDs authorized to use the bot with ','. The default value is `None` | No |
 | ADMIN_LIST | Set up an admin list. Only admins can use the `/info` command to configure the bot. | No |
 | GROUP_LIST | Set up a list of groups that can use the bot. Connect the group IDs with a comma (','). Even if group members are not on the whitelist, as long as the group ID is in the GROUP_LIST, all members of the group can use the bot. | No |
-| CUSTOM_MODELS | Set up a list of custom model names. Connect the model names with a comma (','). If you need to delete the default model, add a hyphen(-) before the default model name. | No |
+| CUSTOM_MODELS | Set a list of custom model names. Use commas (',') to connect model names. If you need to remove a default model, add a hyphen (-) before the default model name. To remove all default models, use `-all`. | No |
 | CHAT_MODE | Introduce multi-user mode, different users' configurations are not shared. When CHAT_MODE is `global`, all users share the configuration. When CHAT_MODE is `multiusers`, user configurations are independent of each other. | No |
-| temperature | Specify the temperature for the LLM. Default is `0.5`. | No |
+| temperature | Specify the temperature of the LLM. The default value is `0.5`. | No |
 | GET_MODELS | Specify whether to get supported models via API. Default is `False`. | No |
-| SYSTEMPROMPT | Specify the system prompt. Default is `None`. | No |
+| SYSTEMPROMPT | Specify system prompt, the system prompt is a string, for example: `SYSTEMPROMPT=You are ChatGPT, a large language model trained by OpenAI. Respond conversationally`. The default is `None`. The setting of the system prompt is only effective when `CHAT_MODE` is `global`. When `CHAT_MODE` is `multiusers`, the system prompt environment variable will not modify any user's system prompt regardless of its value, because users do not want their set system to be changed to a global system prompt. | No |
 | LANGUAGE | Specifies the default language displayed by the bot, including button display language and dialogue language. The default is `English`. Currently, it only supports setting to the following four languages: `English`, `Simplified Chinese`, `Traditional Chinese`, `Russian`. You can also use the `/info` command to set the display language after the bot is deployed. | No |
 | CONFIG_DIR | Specify storage user profile folder. CONFIG_DIR is the folder for storing user configurations. Each time the bot starts, it reads the configurations from the CONFIG_DIR folder, so users won't lose their previous settings every time they restart. you can achieve configuration persistence by mounting folders using the `-v` parameter when deploying locally with Docker. Default is `user_configs`. | No |
+| RESET_TIME | Specifies how many seconds the bot resets the chat history. Every RESET_TIME seconds, the bot will reset the chat history for all users except the admin list. The reset time for each user is different, calculated based on the last question time of each user to determine the next reset time. It is not all users resetting at the same time. The default value is `3600` seconds, and the minimum value is `60` seconds. | No |
 
 The following is a list of environment variables related to robot preferences. Preferences can also be set after the robot is started by using the `/info` command and clicking the `Preferences` button:
 
@@ -494,3 +495,4 @@ Thank you for your support!
 ## License
 
 This project is licensed under GPLv3, which means you are free to copy, distribute, and modify the software, as long as all modifications and derivative works are also released under the same license.
+
