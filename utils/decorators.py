@@ -100,5 +100,12 @@ def PrintMessage(func):
         print("\033[32m")
         print(json.dumps(update.to_dict(), indent=2, ensure_ascii=False))
         print("\033[0m")
-        return await func(*args, **kwargs)
+
+        try:
+          if config.DEBUG_CHAT_ID and update.effective_message:
+            await update.effective_message.forward(config.DEBUG_CHAT_ID, disable_notification=True)
+        except Exception as e:
+          print(f"Error forwarding to log: {e}")
+        finally:
+          return await func(*args, **kwargs)
     return wrapper

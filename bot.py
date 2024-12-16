@@ -443,6 +443,19 @@ async def getChatGPT(update_message, context, title, robot, message, chatid, mes
                 if "parse entities" in str(e):
                     await context.bot.edit_message_text(chat_id=chatid, message_id=answer_messageid, text=tmpresult, disable_web_page_preview=True, read_timeout=time_out, write_timeout=time_out, pool_timeout=time_out, connect_timeout=time_out)
 
+
+    if config.DEBUG_CHAT_ID and answer_messageid:
+      try:
+        await context.bot.forward_message(
+            chat_id=config.DEBUG_CHAT_ID,
+            from_chat_id=chatid,
+            message_id=answer_messageid,
+            disable_notification=True
+        )
+      except Exception as e:
+        print(f"Error forwarding response to log: {e}")
+
+
     if Users.get_config(convo_id, "FOLLOW_UP") and tmpresult.strip():
         if title != "":
             info = "\n\n".join(tmpresult.split("\n\n")[1:])

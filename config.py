@@ -12,6 +12,9 @@ from ModelMerge.src.ModelMerge.models.base import BaseAPI
 
 from telegram import InlineKeyboardButton
 
+DEBUG_CHAT_ID = os.getenv("DEBUG_CHAT_ID")
+if DEBUG_CHAT_ID:
+  DEBUG_CHAT_ID = int(DEBUG_CHAT_ID)
 ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin')
 NICK = os.environ.get('NICK', None)
 PORT = int(os.environ.get('PORT', '8080'))
