@@ -85,17 +85,6 @@ async def command_bot(update, context, language=None, prompt=translator_prompt, 
     stop_event.clear()
     message, rawtext, image_url, chatid, messageid, reply_to_message_text, update_message, message_thread_id, convo_id, file_url, reply_to_message_file_content, voice_text = await GetMesageInfo(update, context)
 
-    # 移除已存在的任务（如果有）
-    remove_job_if_exists(convo_id, context)
-
-    # 添加新的定时任务
-    context.job_queue.run_once(
-        scheduled_function,
-        when=timedelta(seconds=RESET_TIME),
-        chat_id=chatid,
-        name=convo_id
-    )
-
     if has_command == False or len(context.args) > 0:
         if has_command:
             message = ' '.join(context.args)
@@ -110,20 +99,43 @@ async def command_bot(update, context, language=None, prompt=translator_prompt, 
             message = prompt + message
         if message == None:
             message = voice_text
+        # print("message", message)
+        if message and len(message) == 1 and is_emoji(message):
+            return
+
+        message_has_nick = False
+        botNick = config.NICK.lower() if config.NICK else None
+        if rawtext and rawtext.split()[0].lower() == botNick:
+            message_has_nick = True
+
+        if message_has_nick and update_message.reply_to_message and update_message.reply_to_message.caption and not message:
+            message = update_message.reply_to_message.caption
+
         if message:
-            if len(message) == 1 and is_emoji(message):
-                return
-            bot_info = await context.bot.get_me(read_timeout=time_out, write_timeout=time_out, connect_timeout=time_out, pool_timeout=time_out)
-            message_has_nick = False
-            botNick = config.NICK.lower() if config.NICK else None
-            if rawtext and rawtext.split()[0].lower() == botNick:
-                message_has_nick = True
+            if pass_history >= 3:
+                # 移除已存在的任务（如果有）
+                remove_job_if_exists(convo_id, context)
+                # 添加新的定时任务
+                context.job_queue.run_once(
+                    scheduled_function,
+                    when=timedelta(seconds=RESET_TIME),
+                    chat_id=chatid,
+                    name=convo_id
+                )
+
+            bot_info_username = None
+            try:
+                bot_info = await context.bot.get_me(read_timeout=time_out, write_timeout=time_out, connect_timeout=time_out, pool_timeout=time_out)
+                bot_info_username = bot_info.username
+            except Exception as e:
+                bot_info_username = update_message.reply_to_message.from_user.username
+                print("error:", e)
 
             quote_start = "Quoted:\n---\n> "
             quote_end = "\n---\n\nUser reply:\n"
             if update_message.reply_to_message \
             and update_message.from_user.is_bot == False \
-            and (update_message.reply_to_message.from_user.username == bot_info.username or message_has_nick):
+            and (update_message.reply_to_message.from_user.username == bot_info_username or message_has_nick):
                 if update_message.reply_to_message.from_user.is_bot and Users.get_config(convo_id, "TITLE") == True:
                     message = '\n'.join(quote_start + reply_to_message_text.split('\n')[1:]) + quote_end + message
                 else:
@@ -132,7 +144,7 @@ async def command_bot(update, context, language=None, prompt=translator_prompt, 
                     if reply_to_message_file_content:
                         message = reply_to_message_file_content + quote_end + message
             elif update_message.reply_to_message and update_message.reply_to_message.from_user.is_bot \
-            and update_message.reply_to_message.from_user.username != bot_info.username:
+            and update_message.reply_to_message.from_user.username != bot_info_username:
                 return
 
             robot, role, api_key, api_url = get_robot(convo_id)
@@ -402,6 +414,23 @@ async def getChatGPT(update_message, context, title, robot, message, chatid, mes
         else:
             tmpresult = f"{tmpresult}\n\n`{e}`"
     print(tmpresult)
+
+    # 添加图片URL检测和发送
+    if image_has_send == 0:
+        image_extensions = r'(https?://[^\s<>\"()]+(?:\.(?:webp|jpg|jpeg|png|gif)|/image)[^\s<>\"()]*)'
+        image_urls = re.findall(image_extensions, tmpresult, re.IGNORECASE)
+        image_urls_result = [url[0] if isinstance(url, tuple) else url for url in image_urls]
+        if image_urls_result:
+            try:
+                await context.bot.send_photo(
+                    chat_id=chatid,
+                    photo=image_urls_result[0],
+                    message_thread_id=message_thread_id,
+                    reply_to_message_id=messageid,
+                )
+            except Exception as e:
+                logger.warning(f"Failed to send image {image_urls_result[0]}: {str(e)}")
+
     now_result = escape(tmpresult, italic=False)
     if lastresult != now_result and answer_messageid:
         if "Can't parse entities: can't find end of code entity at byte offset" in tmpresult:
